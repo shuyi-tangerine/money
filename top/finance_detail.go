@@ -2,6 +2,7 @@ package top
 
 import (
 	"context"
+	"github.com/shuyi-tangerine/money/gen-go/tangerine/money"
 	"time"
 )
 
@@ -18,6 +19,36 @@ type FinanceDetailPO struct {
 	CreatedBy       string    `json:"created_by" db:"created_by"`
 	UpdatedAt       time.Time `json:"updated_at" db:"updated_at"`
 	UpdatedBy       string    `json:"updated_by" db:"updated_by"`
+
+	// 查询的时候当参数用
+	OperatedAtTimeRange *money.TimeRange `json:"-"`
+	Limit               int64            `json:"-"`
+	Offset              int64            `json:"-"`
+}
+
+func (m *FinanceDetailPO) ToRpcFinanceDetailInfo(ctx context.Context) (rpcFinanceDetailInfo *money.FinanceDetailInfo) {
+	rpcFinanceDetailInfo = &money.FinanceDetailInfo{
+		ID:              m.ID,
+		FinanceDetailID: m.FinanceDetailID,
+		AppID:           m.AppID,
+		Amount:          m.Amount,
+		OperatedType:    m.OperatedType,
+		OperatedAt:      m.OperatedAt.Unix(),
+		OperatedBy:      m.OperatedBy,
+		Extra:           m.Extra,
+		CreatedAt:       m.CreatedAt.Unix(),
+		CreatedBy:       m.CreatedBy,
+		UpdatedAt:       m.UpdatedAt.Unix(),
+		UpdatedBy:       m.UpdatedBy,
+	}
+	return
+}
+
+func NewRpcFinanceDetailInfos(ctx context.Context, pos []*FinanceDetailPO) (rpcFinanceDetailInfos []*money.FinanceDetailInfo) {
+	for _, v := range pos {
+		rpcFinanceDetailInfos = append(rpcFinanceDetailInfos, v.ToRpcFinanceDetailInfo(ctx))
+	}
+	return
 }
 
 type FinanceDetailDao interface {

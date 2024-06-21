@@ -43,7 +43,27 @@ func (m *FinanceDetailDao) Select(ctx context.Context, req *top.FinanceDetailPO)
 		where.WriteString(" and finance_detail_id=?")
 		params = append(params, req.FinanceDetailID)
 	}
-	err = m.DB.SelectContext(ctx, &pos, fmt.Sprintf("select * from %s where %s", TableNameFinanceDetail, where.String()), params...)
+	if req.AppID != 0 {
+		where.WriteString(" and app_id=?")
+		params = append(params, req.AppID)
+	}
+	if req.OperatedAtTimeRange != nil {
+		if req.OperatedAtTimeRange.S > 0 {
+			where.WriteString(" and operated_at>=?")
+			params = append(params, time.Unix(req.OperatedAtTimeRange.S, 0))
+		}
+		if req.OperatedAtTimeRange.E > 0 {
+			where.WriteString(" and operated_at<?")
+			params = append(params, time.Unix(req.OperatedAtTimeRange.E, 0))
+		}
+	}
+	limit := ""
+	if req.Limit != 0 {
+		limit = "limit ?, ?"
+		params = append(params, req.Offset, req.Limit)
+	}
+
+	err = m.DB.SelectContext(ctx, &pos, fmt.Sprintf("select * from %s where %s %s", TableNameFinanceDetail, where.String(), limit), params...)
 	if err != nil {
 		return
 	}
