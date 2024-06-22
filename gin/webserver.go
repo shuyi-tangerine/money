@@ -39,7 +39,7 @@ func (m *Server) AsyncStart(ctx context.Context) {
 	go func() {
 		err := m.Start(ctx)
 		if err != nil {
-			fmt.Println("[AsyncStart] Start panic", err)
+			fmt.Println("[AsyncStart] http Start panic", err)
 			m.c <- err
 		}
 	}()
